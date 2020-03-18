@@ -23,22 +23,25 @@ for i in range(d):
 
 # TODO refactor class
 instance = Instance(city_coords=coords, adjacency_matrix=adjacency_matrix)
-solve_strategy = CheapestInsertion(instance=instance)
+solve_strategy: CheapestInsertion = CheapestInsertion(instance=instance)
 solution = solve_strategy.run()
 
 
 def draw_solution(instance: Instance, solution: list, title: str = None):
     ax = sns.scatterplot(instance.city_coords[:, 0], instance.city_coords[:, 1], color='black', zorder=5)
+
+    for id_source, id_destination in pairwise(solution):
+        ax.annotate('', xy=instance.city_coords[id_source], xytext=instance.city_coords[id_destination],
+                    arrowprops=dict(arrowstyle='-|>', color='red', connectionstyle="arc3"))
+
     for i, coords in enumerate(instance.city_coords):
         ax.text(coords[0] - 35, coords[1] + 25, str(i), size=6)
-    for from_city_id, id_destination in pairwise(solution):
-        x_coords = [instance.city_coords[from_city_id, 0], instance.city_coords[id_destination, 0]]
-        y_coords = [instance.city_coords[from_city_id, 1], instance.city_coords[id_destination, 1]]
-        line = mlines.Line2D(x_coords, y_coords, color='red')
-        ax.add_line(line)
+
     if title is not None:
         ax.set_title(title)
+
+    ax.scatter(instance.city_coords[0, 0], instance.city_coords[0, 1], zorder=6)
     plt.show()
 
 
-draw_solution(instance, solution, 'Cheapest Insertion')
+draw_solution(instance, solution, f'Cheapest Insertion, distance: {solve_strategy.solution_cost}')
