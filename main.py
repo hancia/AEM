@@ -1,13 +1,21 @@
-from collections import OrderedDict
+from random import seed
 
-import tsplib95
+import seaborn as sns
 import numpy as np
-from tsplib95.distances import euclidean
+from cheapest_insertion import CheapestInsertion
+from instance import Instance
+from utils import draw_solution
 
-problem: tsplib95.models.Problem = tsplib95.load_problem('kroA100.tsp')
-coords: OrderedDict = problem.node_coords
-d = problem.dimension
-adjacency_matrix = np.zeros(shape=(d, d), dtype=np.int)
-for i in range(d):
-    for j in range(d):
-        adjacency_matrix[i, j] = euclidean(coords[i + 1], coords[j + 1])
+sns.set()
+np.random.seed(0)
+seed(0)
+
+instance = Instance(name='kroA100')
+solve_strategy: CheapestInsertion = CheapestInsertion(instance=instance)
+solve_strategy.run(run_times=5)
+
+draw_solution(
+    instance=instance,
+    solution=solve_strategy.solution,
+    title=f'Cheapest Insertion, distance: {solve_strategy.solution_cost}'
+)
