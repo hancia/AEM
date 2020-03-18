@@ -17,4 +17,5 @@ solve_strategy.run(run_times=5)
 draw_solution(
     instance=instance,
     solution=solve_strategy.solution,
-    title=f'Cheapest Insertion, distance: {solve_strategy.solution_cost}')
+    title=f'Cheapest Insertion, distance: {solve_strategy.solution_cost}'
+)
