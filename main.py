@@ -11,8 +11,8 @@ np.random.seed(0)
 seed(0)
 
 instance = Instance(name='kroA100')
-solve_strategy: CheapestInsertion = CheapestInsertion(instance=instance)
-solve_strategy.run(run_times=5)
+solve_strategy: CheapestInsertion = CheapestInsertion(instance=instance, regret=1)
+solve_strategy.run(run_times=50)
 
 draw_solution(
     instance=instance,
