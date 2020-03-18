@@ -11,4 +11,3 @@ adjacency_matrix = np.zeros(shape=(d, d), dtype=np.int)
 for i in range(d):
     for j in range(d):
         adjacency_matrix[i, j] = euclidean(coords[i + 1], coords[j + 1])
-print(adjacency_matrix)
