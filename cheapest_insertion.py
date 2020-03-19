@@ -13,11 +13,13 @@ class CheapestInsertion:
         self.instance: instance = instance
         self.regret: int = regret
         self._solution: list = []
+        self.solutions: list = []
 
     def run(self, run_times=50) -> None:
         solutions = [self._solve() for _ in range(run_times)]
         solution, best_cost = min(solutions, key=lambda x: x[1])
         self._solution = solution
+        self.solutions = solutions
 
     def _solve(self):
         solution = self._random_initial_solution()
