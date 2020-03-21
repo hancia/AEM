@@ -2,6 +2,8 @@ from random import seed
 
 import seaborn as sns
 import numpy as np
+from tqdm import tqdm, tnrange
+
 from cheapest_insertion import CheapestInsertion
 from instance import Instance
 from utils import draw_solution
@@ -10,7 +12,7 @@ sns.set()
 np.random.seed(0)
 seed(0)
 
-for instance_name in ['kroA100', 'kroB100']:
+for instance_name in tqdm(['kroA100', 'kroB100']):
     for regret in [0, 1]:
         instance = Instance(name=instance_name)
         solve_strategy: CheapestInsertion = CheapestInsertion(
