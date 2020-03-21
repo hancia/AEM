@@ -9,5 +9,7 @@ setup(
         'numpy',
         'matplotlib',
         'seaborn',
+        'tqdm',
+        'pandas',
     ],
 )
