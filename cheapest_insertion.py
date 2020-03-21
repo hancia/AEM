@@ -1,5 +1,7 @@
 from collections import defaultdict
 from copy import deepcopy
+from math import ceil
+from operator import attrgetter
 from random import sample
 
 import instance
@@ -9,21 +11,22 @@ from utils import pairwise
 
 
 class CheapestInsertion:
-    def __init__(self, instance: instance.Instance, regret=0):
+    def __init__(self, instance: instance.Instance, regret=0, path_length_percentage=50):
         self.instance: instance = instance
         self.regret: int = regret
+        self.goal_length = ceil(instance.length * path_length_percentage / 100)
         self._solution: list = []
         self.solutions: list = []
 
     def run(self, run_times=50) -> None:
-        solutions = [self._solve() for _ in range(run_times)]
+        solutions = [self._solve(first_city_id=i) for i in range(run_times)]
         solution, best_cost = min(solutions, key=lambda x: x[1])
         self._solution = solution
         self.solutions = solutions
 
-    def _solve(self):
-        solution = self._random_initial_solution()
-        while len(set(solution)) < 50:
+    def _solve(self, first_city_id=0):
+        solution = [first_city_id, first_city_id]
+        while len(set(solution)) < self.goal_length:
 
             cities_id_to_check = list(set(range(self.instance.length)) - set(solution))
 
@@ -63,11 +66,11 @@ class CheapestInsertion:
         """
         result = list()
         for city_id, insertions in city_insertions.items():
-            sorted_insertions = sorted(insertions, key=lambda x: x.cost)
+            sorted_insertions = sorted(insertions, key=attrgetter('cost', 'city_id'))
             cheapest_insertion = sorted_insertions[0]
             changed_insertion = deepcopy(cheapest_insertion)
 
-            if self.regret != 0:
+            if self.regret != 0 and len(insertions) >= 2:
                 for i in range(1, 1 + self.regret):
                     changed_insertion.cost += cheapest_insertion.cost - sorted_insertions[i].cost
                 changed_insertion.cost *= -1  # dirty hack to avoid checking if there is regret or no during
