@@ -9,7 +9,7 @@ def pairwise(list_to_pair: Iterable):
     return zip(list_to_pair, list_to_pair[1:])
 
 
-def draw_solution(instance: Instance, solution: list, title: str = None) -> None:
+def draw_solution(instance: Instance, solution: list, title: str = None, save_file_name: str = None) -> None:
     ax = sns.scatterplot(instance.city_coords[:, 0], instance.city_coords[:, 1], color='black', zorder=5)
 
     for id_source, id_destination in pairwise(solution):
@@ -22,6 +22,8 @@ def draw_solution(instance: Instance, solution: list, title: str = None) -> None
     if title is not None:
         ax.set_title(title)
 
-    ax.scatter(instance.city_coords[0, 0], instance.city_coords[0, 1], zorder=6)
-    plt.savefig('{}.png'.format(title))
+    first_vertex = solution[0]
+    ax.scatter(instance.city_coords[first_vertex, 0], instance.city_coords[first_vertex, 1], zorder=6)
+    if save_file_name is not None:
+        plt.savefig(save_file_name)
     plt.show()

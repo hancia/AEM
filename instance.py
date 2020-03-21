@@ -9,6 +9,7 @@ class Instance:
     PATH = 'instances/{}.tsp'
 
     def __init__(self, name: str):
+        self.name = name
         self.adjacency_matrix: np.ndarray = None
         self.city_coords: np.ndarray = None
         self.load_instance(name)

@@ -10,12 +10,22 @@ sns.set()
 np.random.seed(0)
 seed(0)
 
-instance = Instance(name='kroA100')
-solve_strategy: CheapestInsertion = CheapestInsertion(instance=instance, regret=1)
-solve_strategy.run(run_times=50)
+for instance_name in ['kroA100', 'kroB100']:
+    for regret in [0, 1]:
+        instance = Instance(name=instance_name)
+        solve_strategy: CheapestInsertion = CheapestInsertion(
+            instance=instance,
+            regret=regret,
+            path_length_percentage=100,
+        )
+        solve_strategy.run(run_times=100)
 
-draw_solution(
-    instance=instance,
-    solution=solve_strategy.solution,
-    title=f'Cheapest Insertion, distance: {solve_strategy.solution_cost}'
-)
+        costs = list(map(lambda x: x[1], solve_strategy.solutions))
+        print(instance_name, regret, min(costs), int(round(np.average(costs))), max(costs))
+
+        draw_solution(
+            instance=instance,
+            solution=solve_strategy.solution,
+            title=f'Greedy Cycle, {instance.name}, distance: {solve_strategy.solution_cost}, regret: {regret}',
+            save_file_name=f'{instance.name}_{regret}.png'
+        )
