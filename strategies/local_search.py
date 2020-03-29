@@ -1,10 +1,12 @@
 from copy import deepcopy
 from itertools import product
-from random import sample
+from random import sample, seed
 
 from api.instance import Instance
 from strategies.abstract import AbstractStrategy
 from utils.utils import pairwise
+
+import numpy as np
 
 
 class LocalSearch(AbstractStrategy):
@@ -18,35 +20,42 @@ class LocalSearch(AbstractStrategy):
         self.solutions: list = []
 
     def run(self, run_times=100):
-        solutions = [self._solve_greedy_vertex() for _ in range(run_times)]
+        solutions = [self._solve_greedy_vertex(i) for i in range(run_times)]
         solution, best_cost = min(solutions, key=lambda x: x[1])
         self._solution = solution
         self.solutions = solutions
 
-    def _solve_greedy_vertex(self):
+    def _solve_greedy_vertex(self, s):
+        np.random.seed(s)
+        seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!!
         solution: list = sample(list(range(100)), 50)
         improvement: bool = True
         while improvement:
             improvement = False
-
+            vertices_to_change = None
             out_of_solution = list(set(range(100)) - set(solution))
-            for (remove_id, insert_id, swap_a_id, swap_b_id) in product(range(50), repeat=4):
+            for remove_id, insert_id in product(range(50), repeat=2):
+                change1 = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
+                if change1 < 0:
+                    vertices_to_change = (remove_id, insert_id)
+                    break
+
+            if vertices_to_change is None:
+                break
+            else:
+                candidate = deepcopy(solution)
+                candidate[vertices_to_change[0]] = out_of_solution[vertices_to_change[1]]
+
+            for swap_a_id, swap_b_id in product(range(50), repeat=2):
                 if swap_b_id == swap_a_id:
                     continue
-
-                change1 = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
-
-                candidate = deepcopy(solution)
-                candidate[remove_id] = out_of_solution[insert_id]
                 change2 = self.get_value_of_swap_vertices(candidate, swap_a_id, swap_b_id)
-
-                if change1 + change2 < 0:
+                if change2 < 0:
                     candidate[swap_a_id], candidate[swap_b_id] = candidate[swap_b_id], candidate[swap_a_id]
                     solution = candidate
                     improvement = True
                     break
-
         return solution, self._get_solution_cost(solution)
 
     def get_value_of_change_vertices(self, s, o, r_id,
@@ -70,10 +79,10 @@ class LocalSearch(AbstractStrategy):
         one, two, three, four = a_v_id - 1, (a_v_id + 1) % 50, b_v_id - 1, (b_v_id + 1) % 50
         c = self.instance.adjacency_matrix
 
-        if a_v_id == 0 and b_v_id == 50-1:
+        if a_v_id == 0 and b_v_id == 50 - 1:
             now_length = c[s[three], s[b_v_id]] + c[s[b_v_id], s[a_v_id]] + c[s[a_v_id], s[two]]
             new_length = c[s[three], s[a_v_id]] + c[s[a_v_id], s[b_v_id]] + c[s[b_v_id], s[two]]
-        elif b_v_id-a_v_id == 1:
+        elif b_v_id - a_v_id == 1:
             now_length = c[s[one], s[a_v_id]] + c[s[a_v_id], s[b_v_id]] + c[s[b_v_id], s[four]]
             new_length = c[s[one], s[b_v_id]] + c[s[b_v_id], s[a_v_id]] + c[s[a_v_id], s[four]]
         else:

@@ -10,9 +10,6 @@ from strategies.local_search import LocalSearch
 from utils.utils import draw_solution
 
 sns.set()
-np.random.seed(0)
-seed(0)
-
 for instance_name in tqdm(['kroA100']):
     instance = Instance(name=instance_name)
     solve_strategy: LocalSearch = LocalSearch(
@@ -20,7 +17,7 @@ for instance_name in tqdm(['kroA100']):
         version='greedy',
         neighbourhood='vertice',
     )
-    solve_strategy.run(run_times=1)
+    solve_strategy.run(run_times=100)
 
     costs = list(map(lambda x: x[1], solve_strategy.solutions))
     print(instance_name, min(costs), int(round(np.average(costs))), max(costs))
