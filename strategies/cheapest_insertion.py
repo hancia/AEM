@@ -4,13 +4,14 @@ from math import ceil
 from operator import attrgetter
 from random import sample
 
-import instance
+from api import instance
 
-from insertion import Insertion
-from utils import pairwise
+from api.insertion import Insertion
+from strategies.abstract import AbstractStrategy
+from utils.utils import pairwise
 
 
-class CheapestInsertion:
+class CheapestInsertion(AbstractStrategy):
     def __init__(self, instance: instance.Instance, regret=0, path_length_percentage=50):
         self.instance: instance = instance
         self.regret: int = regret
@@ -49,11 +50,6 @@ class CheapestInsertion:
         cost_insertion = cost_after - cost_before
         return cost_insertion
 
-    def _get_solution_cost(self, solution) -> int:
-        # if we dont want random solutions, change it to yielding before generated list
-        return sum([self.instance.adjacency_matrix[id_source, id_destination]
-                    for id_source, id_destination in pairwise(solution)])
-
     def _random_initial_solution(self) -> list:
         ids = sample(range(self.instance.length), 2)
         return ids + [ids[0]]
@@ -78,11 +74,3 @@ class CheapestInsertion:
 
             result.append(changed_insertion)
         return result
-
-    @property
-    def solution(self) -> list:
-        return self._solution
-
-    @property
-    def solution_cost(self) -> int:
-        return self._get_solution_cost(self._solution)

@@ -2,11 +2,11 @@ from random import seed
 
 import seaborn as sns
 import numpy as np
-from tqdm import tqdm, tnrange
+from tqdm import tqdm
 
-from cheapest_insertion import CheapestInsertion
-from instance import Instance
-from utils import draw_solution
+from strategies.cheapest_insertion import CheapestInsertion
+from api.instance import Instance
+from utils.utils import draw_solution
 
 sns.set()
 np.random.seed(0)
