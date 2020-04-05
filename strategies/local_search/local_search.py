@@ -21,20 +21,25 @@ class LocalSearch(AbstractStrategy):
         self.solutions: list = []
 
     def run(self, run_times=100):
-        self.solutions = [self._solve(i) for i in range(run_times)]
+        self.solutions = list()
+        for i in range(run_times):
+            if self.version == 'greedy':
+                self.solutions.append(self._solve_greedy(i))
+            else:
+                self.solutions.append(self._solve_steepest(i))
         solution, _, _ = min(self.solutions, key=lambda x: x[1])
         self._solution = solution
 
-    def _solve(self, s):
+    def _solve_steepest(self, s):
         start = time.time()
         np.random.seed(s)
         seed(s)
-
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
         solution: list = sample(list(range(100)), 50)
-        improvement: bool = True
-        while improvement:
-            improvement = False
+        improvement_out: bool = True
+        improvement_in: bool = True
+        while improvement_out or improvement_in:
+            improvement_out = False
             candidate = None
             best_value = 0
 
@@ -45,14 +50,14 @@ class LocalSearch(AbstractStrategy):
                     candidate = deepcopy(solution)
                     candidate[remove_id] = out_of_solution[insert_id]
                     best_value = diff
-                    if self.version == 'greedy':
-                        break
+                    improvement_out = True
 
-            if candidate is None:
-                break
+            if improvement_out is False:
+                candidate = deepcopy(solution)
 
             best_swap = (0, 0)
             best_value = 0
+            improvement_in = False
             for swap_a_id, swap_b_id in product(range(50), repeat=2):
                 if swap_b_id <= swap_a_id:
                     continue
@@ -65,16 +70,68 @@ class LocalSearch(AbstractStrategy):
                 if diff < best_value:
                     best_swap = (swap_a_id, swap_b_id)
                     best_value = diff
-                    improvement = True
-                    if self.version == 'greedy':
-                        break
+                    improvement_in = True
 
-            if improvement:
+            if improvement_in:
                 if self.neighbourhood == 'vertex':
                     candidate[best_swap[0]], candidate[best_swap[1]] = candidate[best_swap[1]], candidate[best_swap[0]]
                 else:
                     candidate = candidate[:best_swap[0] + 1] + candidate[best_swap[0] + 1:best_swap[1] + 1][::-1] + \
                                 candidate[best_swap[1] + 1:]
+
+            if improvement_in or improvement_out:
+                solution = candidate
+
+        solution += [solution[0]]
+        return solution, self._get_solution_cost(solution), time.time() - start
+
+    def _solve_greedy(self, s):
+        start = time.time()
+        np.random.seed(s)
+        seed(s)
+        # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
+        solution: list = sample(list(range(100)), 50)
+        improvement_out: bool = True
+        improvement_in: bool = True
+        while improvement_out or improvement_in:
+            order = sample(['out', 'in'], 2)
+            for imp in order:
+                candidate = deepcopy(solution)
+                if imp == 'out':
+                    improvement_out = False
+
+                    out_of_solution = list(set(range(100)) - set(solution))
+                    for remove_id, insert_id in product(range(50), repeat=2):
+                        diff = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
+                        if diff < 0:
+                            candidate = deepcopy(solution)
+                            candidate[remove_id] = out_of_solution[insert_id]
+                            improvement_out = True
+                            break
+
+                if imp == 'in':
+                    improvement_in = False
+
+                    for swap_a_id, swap_b_id in product(range(50), repeat=2):
+                        if swap_b_id <= swap_a_id:
+                            continue
+
+                        if self.neighbourhood == 'vertex':
+                            diff = self.get_value_of_swap_vertices(candidate, swap_a_id, swap_b_id)
+                        else:
+                            diff = self.get_value_of_swap_edges(candidate, swap_a_id, swap_b_id)
+
+                        if diff < 0:
+                            improvement_in = True
+
+                            if self.neighbourhood == 'vertex':
+                                candidate[swap_a_id], candidate[swap_b_id] = candidate[swap_b_id], candidate[
+                                    swap_a_id]
+                            else:
+                                candidate = candidate[:swap_a_id + 1] + candidate[swap_a_id + 1:swap_b_id + 1][::-1] + \
+                                            candidate[swap_b_id + 1:]
+
+            if improvement_in or improvement_out:
                 solution = candidate
 
         solution += [solution[0]]
@@ -89,10 +146,9 @@ class LocalSearch(AbstractStrategy):
         return new_length - now_length
 
     def get_value_of_swap_vertices(self, s, a_v_id, b_v_id):
-        # 1 - A - 2 ... 3 - B - 4   -> 1 - B - 2 ... 3 - A - 4
-        # in typical case but for      33-34 it is 32-33-34-35 so 1-A-B-4  1-B-A-4
-        # but best case is 0-last   cycle-> last-1  -last-0-1 so three-last-A-2 xD
-        # do not try understand it xDDDDDDDD
+        # typical case: 1 - A - 2 ... 3 - B - 4   -> 1 - B - 2 ... 3 - A - 4
+        # neighbours eg: 33-34 it is 32-33-34-35 -> 1-A-B-4  1-B-A-4
+        # first and last: A(0)-B(50) [it is reversed!], 3-B-A-2 -> 3-A-B-2
 
         one, two, three, four = a_v_id - 1, (a_v_id + 1) % 50, b_v_id - 1, (
                 b_v_id + 1) % 50  # -1 is a correct idx in solution ;)

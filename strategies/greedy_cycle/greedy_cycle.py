@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 from tqdm import tqdm
 
-from strategies.cheapest_insertion import CheapestInsertion
+from strategies.greedy_cycle.cheapest_insertion import CheapestInsertion
 from api.instance import Instance
 from utils.utils import draw_solution
 
@@ -18,9 +18,9 @@ for instance_name in tqdm(['kroA100', 'kroB100']):
         solve_strategy: CheapestInsertion = CheapestInsertion(
             instance=instance,
             regret=regret,
-            path_length_percentage=100,
+            path_length_percentage=50,
         )
-        solve_strategy.run(run_times=100)
+        solve_strategy.run(run_times=1)
 
         costs = list(map(lambda x: x[1], solve_strategy.solutions))
         print(instance_name, regret, min(costs), int(round(np.average(costs))), max(costs))

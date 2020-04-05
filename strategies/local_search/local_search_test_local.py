@@ -1,14 +1,10 @@
-from collections import defaultdict
 from itertools import product
-from random import seed
 
 import seaborn as sns
-import numpy as np
 from tqdm import tqdm
 
-from strategies.cheapest_insertion import CheapestInsertion
 from api.instance import Instance
-from strategies.local_search import LocalSearch
+from strategies.local_search.local_search import LocalSearch
 from utils.utils import draw_solution
 import pandas as pd
 
@@ -22,7 +18,7 @@ for version, neighbourhood in tqdm(product(['greedy', 'steepest'], ['vertex', 'e
             version=version,
             neighbourhood=neighbourhood,
         )
-        solve_strategy.run(run_times=100)
+        solve_strategy.run(run_times=1)
 
         costs = list(map(lambda x: x[1], solve_strategy.solutions))
 
