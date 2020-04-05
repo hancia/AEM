@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from instance import Instance
+from api.instance import Instance
 import seaborn as sns
 import matplotlib.pyplot as plt
 
