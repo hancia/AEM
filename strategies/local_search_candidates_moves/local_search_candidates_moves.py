@@ -53,7 +53,7 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
                 candidate = deepcopy(solution)
 
             edges = list()
-            sorted_neigh = np.argsort(self.instance.adjacency_matrix, axis=1)[:, 1:11]
+            sorted_neigh = np.argsort(self.instance.adjacency_matrix, axis=1)[:, 1:6]
             for i, vertex in enumerate(candidate):
                 neighbours = sorted_neigh[vertex]
                 true_neigh = [candidate[i - 1], candidate[(i + 1) % 50]]
