@@ -16,8 +16,8 @@ for instance_name in ['kroA100', 'kroB100']:
     solve_strategy: LocalSearchWitchCandidatesMoves = LocalSearchWitchCandidatesMoves(
         instance=instance,
     )
-    solve_strategy.run(run_times=100)
-    # raise KeyError
+    solve_strategy.run(run_times=1)
+
     costs = list(map(lambda x: x[1], solve_strategy.solutions))
     times = list(map(lambda x: x[2], solve_strategy.solutions))
     print(instance_name, min(costs), np.mean(times))
