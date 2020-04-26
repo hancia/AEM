@@ -54,39 +54,27 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
             if improvement_out is False:
                 candidate = deepcopy(solution)
 
-            edges = list()
-            for i, vertex in enumerate(candidate):
-                neighbours = sorted_neigh[vertex]
-                a = candidate.index(vertex)
-                for neigh in list(set(neighbours) & set(candidate)):
-                    b = candidate.index(neigh)
-                    e = None
-                    if a < b:
-                        e = Edge(a, b)
-                    elif a > b:
-                        e = Edge(b, a)
-                    if e:
-                        assert e.a < e.b, "tescik"
-                        edges.append(e)
-
             best_swap = (0, 0)
             best_value = 0
             improvement_in = False
 
-            for edge_first, edge_second in product(list(set(edges)), repeat=2):
-                swap_a_id, swap_b_id = edge_first.a, edge_second.a
-                if edge_first == edge_second or swap_a_id == swap_b_id:
-                    continue
+            for vertex in candidate:
+                neighbours = sorted_neigh[vertex]
+                a = candidate.index(vertex)
+                neighbours_ids = [candidate.index(n) for n in neighbours if n in set(candidate) & set(neighbours)]
+                for swap_a_id, swap_b_id in product([a], neighbours_ids):
+                    if swap_a_id == swap_b_id:
+                        continue
 
-                if swap_b_id < swap_a_id:
-                    swap_a_id, swap_b_id = swap_b_id, swap_a_id
+                    if swap_b_id < swap_a_id:
+                        swap_a_id, swap_b_id = swap_b_id, swap_a_id
 
-                diff = self.get_value_of_swap_edges(candidate, swap_a_id, swap_b_id)
+                    diff = self.get_value_of_swap_edges(candidate, swap_a_id, swap_b_id)
 
-                if diff < best_value:
-                    best_swap = (swap_a_id, swap_b_id)
-                    best_value = diff
-                    improvement_in = True
+                    if diff < best_value:
+                        best_swap = (swap_a_id, swap_b_id)
+                        best_value = diff
+                        improvement_in = True
 
             if improvement_in:
                 candidate = candidate[:best_swap[0] + 1] + candidate[best_swap[0] + 1:best_swap[1] + 1][::-1] + \

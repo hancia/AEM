@@ -90,7 +90,7 @@ class LocalSearch(AbstractStrategy):
         np.random.seed(s)
         seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
-        solution: list = sample(list(range(self.instance.length)), self.instance.length/2)
+        solution: list = sample(list(range(self.instance.length)), int(self.instance.length/2))
         improvement_out: bool = True
         improvement_in: bool = True
         while improvement_out or improvement_in:

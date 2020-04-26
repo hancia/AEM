@@ -24,11 +24,12 @@ for version, neighbourhood in tqdm(product(['greedy', 'steepest'], ['vertex', 'e
 
         for s, cost, time in solve_strategy.solutions:
             df = df.append(pd.DataFrame([[version, neighbourhood, cost, time]],columns=['version', 'neigbourhood', 'cost', 'time']))
-
-        draw_solution(
-            instance=instance,
-            solution=solve_strategy.solution,
-            title=f'Local search {version}, {instance.name}, distance: {solve_strategy.solution_cost}, {neighbourhood}',
-            save_file_name=f'{instance.name}_{min(costs)}_{version}_{neighbourhood}.png'
-        )
+        print(" ")
+        print(df)
+        # draw_solution(
+        #     instance=instance,
+        #     solution=solve_strategy.solution,
+        #     title=f'Local search {version}, {instance.name}, distance: {solve_strategy.solution_cost}, {neighbourhood}',
+        #     save_file_name=f'{instance.name}_{min(costs)}_{version}_{neighbourhood}.png'
+        # )
 
