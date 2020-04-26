@@ -33,29 +33,65 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
         solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
         improvement_out: bool = True
+        improvement_in: bool = True
         Edge = namedtuple('Edge', 'a b')
-        while improvement_out:
+        sorted_neigh = np.argsort(self.instance.adjacency_matrix, axis=1)[:, 1:6]
+
+        while improvement_in or improvement_out:
+
             improvement_out = False
             candidate = deepcopy(solution)
-            sorted_neigh = np.argsort(self.instance.adjacency_matrix, axis=1)[:, 1:6]
-
             best_value = 0
             out_of_solution = list(set(range(self.instance.length)) - set(solution))
-            for vertex in solution:
+            for remove_id, insert_id in product(range(50), repeat=2):
+                diff = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
+                if diff < best_value:
+                    candidate = deepcopy(solution)
+                    candidate[remove_id] = out_of_solution[insert_id]
+                    best_value = diff
+                    improvement_out = True
+
+            if improvement_out is False:
+                candidate = deepcopy(solution)
+
+            edges = list()
+            for i, vertex in enumerate(candidate):
                 neighbours = sorted_neigh[vertex]
+                a = candidate.index(vertex)
+                for neigh in list(set(neighbours) & set(candidate)):
+                    b = candidate.index(neigh)
+                    e = None
+                    if a < b:
+                        e = Edge(a, b)
+                    elif a > b:
+                        e = Edge(b, a)
+                    if e:
+                        assert e.a < e.b, "tescik"
+                        edges.append(e)
 
-                for neigh in neighbours:
-                    if neigh in solution:
-                        continue
-                    diff = self.get_value_of_change_vertices(solution, out_of_solution, solution.index(vertex),
-                                                             out_of_solution.index(neigh))
-                    if diff < best_value:
-                        candidate = deepcopy(solution)
-                        candidate[solution.index(vertex)] = out_of_solution[out_of_solution.index(neigh)]
-                        best_value = diff
-                        improvement_out = True
+            best_swap = (0, 0)
+            best_value = 0
+            improvement_in = False
 
-            if improvement_out:
+            for edge_first, edge_second in product(list(set(edges)), repeat=2):
+                swap_a_id, swap_b_id = edge_first.a, edge_second.a
+                if edge_first == edge_second or swap_a_id == swap_b_id:
+                    continue
+
+                if swap_b_id < swap_a_id:
+                    swap_a_id, swap_b_id = swap_b_id, swap_a_id
+
+                diff = self.get_value_of_swap_edges(candidate, swap_a_id, swap_b_id)
+
+                if diff < best_value:
+                    best_swap = (swap_a_id, swap_b_id)
+                    best_value = diff
+                    improvement_in = True
+
+            if improvement_in:
+                candidate = candidate[:best_swap[0] + 1] + candidate[best_swap[0] + 1:best_swap[1] + 1][::-1] + \
+                            candidate[best_swap[1] + 1:]
+            if improvement_in or improvement_out:
                 solution = candidate
 
         solution += [solution[0]]
