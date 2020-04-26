@@ -12,7 +12,7 @@ import numpy as np
 
 
 class LocalSearchWitchCandidatesMoves(AbstractStrategy):
-    def __init__(self, instance: Instance, version: str = 'greedy', neighbourhood='vertex'):
+    def __init__(self, instance: Instance, version: str = 'steepest', neighbourhood='edge'):
         self.instance = instance
         self.version = version
         self.neighbourhood = neighbourhood
@@ -31,7 +31,7 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
         np.random.seed(s)
         seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
-        solution: list = sample(list(range(100)), 50)
+        solution: list = sample(list(range(self.instance.length)), int(self.instance.length/2))
         improvement_out: bool = True
         improvement_in: bool = True
         Edge = namedtuple('Edge', 'a b')
@@ -40,8 +40,8 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
             candidate = None
             best_value = 0
 
-            out_of_solution = list(set(range(100)) - set(solution))
-            for remove_id, insert_id in product(range(50), repeat=2):
+            out_of_solution = list(set(range(self.instance.length)) - set(solution))
+            for remove_id, insert_id in product(range(int(self.instance.length/2)), repeat=2):
                 diff = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
                 if diff < best_value:
                     candidate = deepcopy(solution)
@@ -56,7 +56,7 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
             sorted_neigh = np.argsort(self.instance.adjacency_matrix, axis=1)[:, 1:6]
             for i, vertex in enumerate(candidate):
                 neighbours = sorted_neigh[vertex]
-                true_neigh = [candidate[i - 1], candidate[(i + 1) % 50]]
+                true_neigh = [candidate[i - 1], candidate[(i + 1) % int(self.instance.length/2)]]
                 a = candidate.index(vertex)
                 for neigh in list(set(neighbours) & set(true_neigh)):
                     b = candidate.index(neigh)
@@ -103,15 +103,15 @@ class LocalSearchWitchCandidatesMoves(AbstractStrategy):
         # return difference in length of cycle, if > 0 bad, if < 0 good
         c = self.instance.adjacency_matrix
 
-        now_length = c[s[r_id - 1], s[r_id]] + c[s[r_id], s[(r_id + 1) % 50]]
-        new_length = c[s[r_id - 1], o[i_id]] + c[o[i_id], s[(r_id + 1) % 50]]
+        now_length = c[s[r_id - 1], s[r_id]] + c[s[r_id], s[(r_id + 1) % int(self.instance.length/2)]]
+        new_length = c[s[r_id - 1], o[i_id]] + c[o[i_id], s[(r_id + 1) % int(self.instance.length/2)]]
         return new_length - now_length
 
     def get_value_of_swap_edges(self, s, swap_a_id, swap_b_id):
         c = self.instance.adjacency_matrix
 
-        from_e1_v, to_e1_v = s[swap_a_id], s[(swap_a_id + 1) % 50]
-        from_e2_v, to_e2_v = s[swap_b_id], s[(swap_b_id + 1) % 50]
+        from_e1_v, to_e1_v = s[swap_a_id], s[(swap_a_id + 1) % int(self.instance.length/2)]
+        from_e2_v, to_e2_v = s[swap_b_id], s[(swap_b_id + 1) % int(self.instance.length/2)]
 
         diff = c[from_e1_v, from_e2_v] + c[to_e1_v, to_e2_v] - c[from_e1_v, to_e1_v] - c[from_e2_v, to_e2_v]
         return diff
