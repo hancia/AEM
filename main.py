@@ -16,7 +16,7 @@ import pandas as pd
 
 sns.set()
 df = pd.DataFrame(columns=['strategy', 'instance', 'cost', 'time'])
-for instance_name in ['kroA200', 'kroB200']:
+for instance_name in ['kroA200']:
     instance = Instance(name=instance_name)
     solve_strategy1: LocalSearch = LocalSearch(
         instance=instance,
@@ -32,16 +32,17 @@ for instance_name in ['kroA200', 'kroB200']:
     solve_strategies["Candidate_moves"] = solve_strategy2
 
     for str_id in solve_strategies.keys():
+        print(',')
         solve_strategy = solve_strategies[str_id]
         solve_strategy.run(run_times=10)
         for s, cost, time in solve_strategy.solutions:
             df = df.append(
                 pd.DataFrame([[str_id, instance_name, cost, time]], columns=['strategy', 'instance', 'cost', 'time']))
         costs = list(map(lambda x: x[1], solve_strategy.solutions))
-        draw_solution(
-            instance=instance,
-            solution=solve_strategy.solution,
-            title=f'{str_id}, {instance.name}, distance: {solve_strategy.solution_cost}, ',
-            save_file_name=f'{instance.name}_{min(costs)}_{str_id}.png'
-        )
+        # draw_solution(
+        #     instance=instance,
+        #     solution=solve_strategy.solution,
+        #     title=f'{str_id}, {instance.name}, distance: {solve_strategy.solution_cost}, ',
+        #     save_file_name=f'{instance.name}_{min(costs)}_{str_id}.png'
+        # )
 print(df)
