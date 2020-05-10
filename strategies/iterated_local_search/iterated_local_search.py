@@ -14,7 +14,7 @@ import numpy as np
 
 
 class IteratedLocalSearch(AbstractStrategy):
-    def __init__(self, instance: Instance, perturbation=10, neighbourhood='edge'):
+    def __init__(self, instance: Instance, perturbation=24, neighbourhood='edge'):
         assert neighbourhood in ['vertex', 'edge'], "Niedozwolone sąsiedztwo"
         self.instance = instance
         self.neighbourhood = neighbourhood
@@ -38,7 +38,7 @@ class IteratedLocalSearch(AbstractStrategy):
         solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
         results = dict()
         i = 0
-        while time.time() - start <= 28:
+        while time.time() - start <= 240:
             i += 1
             solution = self.perturbate(solution)
             improvement_out: bool = True
@@ -93,7 +93,7 @@ class IteratedLocalSearch(AbstractStrategy):
                 'i': i
             }
         min_cost_id = min(results, key=lambda key: results[key]['cost'])
-        print(results[min_cost_id]['cost'])
+        # print(results[min_cost_id]['cost'])
         return results[min_cost_id]['path'], results[min_cost_id]['cost'], time.time() - start
 
     def get_value_of_change_vertices(self, s, o, r_id, i_id):

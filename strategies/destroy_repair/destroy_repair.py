@@ -16,7 +16,7 @@ import numpy as np
 
 
 class DestroyRepairLocalSearch(AbstractStrategy):
-    def __init__(self, instance: Instance, perturbation=20, neighbourhood='edge'):
+    def __init__(self, instance: Instance, perturbation=40, neighbourhood='edge'):
         assert neighbourhood in ['vertex', 'edge'], "Niedozwolone sąsiedztwo"
         self.instance = instance
         self.neighbourhood = neighbourhood
@@ -44,7 +44,7 @@ class DestroyRepairLocalSearch(AbstractStrategy):
         solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
         results = dict()
         i=0
-        while time.time() - start <= 28:
+        while time.time() - start <= 240:
             i+=1
             solution = self.destroy_repair(solution)
             improvement_out: bool = True

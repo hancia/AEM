@@ -18,10 +18,10 @@ import numpy as np
 
 sns.set()
 df = pd.DataFrame(columns=['version', 'instance', 'cost', 'time'])
-for instance_name in ['kroA100', 'kroB100']:
-    for p in [8,10,12,14,16]:
+for instance_name in ['kroA200', 'kroB200']:
+    for p in [40, 85]:
         instance = Instance(name=instance_name)
-        solve_strategy: IteratedLocalSearch = IteratedLocalSearch(
+        solve_strategy: DestroyRepairLocalSearch = DestroyRepairLocalSearch(
             instance=instance,
             perturbation=p
         )
