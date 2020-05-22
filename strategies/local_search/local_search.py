@@ -30,12 +30,19 @@ class LocalSearch(AbstractStrategy):
         solution, _, _ = min(self.solutions, key=lambda x: x[1])
         self._solution = solution
 
-    def _solve_steepest(self, s):
+    def solve(self, solution, seed):
+        solution, a, b = self._solve_steepest(seed, list(solution), cycle=False)
+        return solution, a
+
+    def _solve_steepest(self, s, sol=None, cycle=True):
         start = time.time()
         np.random.seed(s)
         seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
-        solution: list = sample(list(range(self.instance.length)), int(self.instance.length/2))
+        if sol is None:
+            solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
+        else:
+            solution = sol
         improvement_out: bool = True
         improvement_in: bool = True
         while improvement_out or improvement_in:
@@ -44,7 +51,7 @@ class LocalSearch(AbstractStrategy):
             best_value = 0
 
             out_of_solution = list(set(range(self.instance.length)) - set(solution))
-            for remove_id, insert_id in product(range(int(self.instance.length/2)), repeat=2):
+            for remove_id, insert_id in product(range(int(self.instance.length / 2)), repeat=2):
                 diff = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
                 if diff < best_value:
                     candidate = deepcopy(solution)
@@ -58,7 +65,7 @@ class LocalSearch(AbstractStrategy):
             best_swap = (0, 0)
             best_value = 0
             improvement_in = False
-            for swap_a_id, swap_b_id in product(range(int(self.instance.length/2)), repeat=2):
+            for swap_a_id, swap_b_id in product(range(int(self.instance.length / 2)), repeat=2):
                 if swap_b_id <= swap_a_id:
                     continue
 
@@ -82,7 +89,8 @@ class LocalSearch(AbstractStrategy):
             if improvement_in or improvement_out:
                 solution = candidate
 
-        solution += [solution[0]]
+        if cycle:
+            solution += [solution[0]]
         return solution, self._get_solution_cost(solution), time.time() - start
 
     def _solve_greedy(self, s):
@@ -90,7 +98,7 @@ class LocalSearch(AbstractStrategy):
         np.random.seed(s)
         seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
-        solution: list = sample(list(range(self.instance.length)), int(self.instance.length/2))
+        solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
         improvement_out: bool = True
         improvement_in: bool = True
         while improvement_out or improvement_in:
@@ -101,7 +109,7 @@ class LocalSearch(AbstractStrategy):
                     improvement_out = False
 
                     out_of_solution = list(set(range(self.instance.length)) - set(solution))
-                    for remove_id, insert_id in product(range(int(self.instance.length/2)), repeat=2):
+                    for remove_id, insert_id in product(range(int(self.instance.length / 2)), repeat=2):
                         diff = self.get_value_of_change_vertices(solution, out_of_solution, remove_id, insert_id)
                         if diff < 0:
                             candidate = deepcopy(solution)
@@ -112,7 +120,7 @@ class LocalSearch(AbstractStrategy):
                 if imp == 'in':
                     improvement_in = False
 
-                    for swap_a_id, swap_b_id in product(range(int(self.instance.length/2)), repeat=2):
+                    for swap_a_id, swap_b_id in product(range(int(self.instance.length / 2)), repeat=2):
                         if swap_b_id <= swap_a_id:
                             continue
 
@@ -141,8 +149,8 @@ class LocalSearch(AbstractStrategy):
         # return difference in length of cycle, if > 0 bad, if < 0 good
         c = self.instance.adjacency_matrix
 
-        now_length = c[s[r_id - 1], s[r_id]] + c[s[r_id], s[(r_id + 1) % int(self.instance.length/2)]]
-        new_length = c[s[r_id - 1], o[i_id]] + c[o[i_id], s[(r_id + 1) % int(self.instance.length/2)]]
+        now_length = c[s[r_id - 1], s[r_id]] + c[s[r_id], s[(r_id + 1) % int(self.instance.length / 2)]]
+        new_length = c[s[r_id - 1], o[i_id]] + c[o[i_id], s[(r_id + 1) % int(self.instance.length / 2)]]
         return new_length - now_length
 
     def get_value_of_swap_vertices(self, s, a_v_id, b_v_id):
@@ -150,11 +158,11 @@ class LocalSearch(AbstractStrategy):
         # neighbours eg: 33-34 it is 32-33-34-35 -> 1-A-B-4  1-B-A-4
         # first and last: A(0)-B(50) [it is reversed!], 3-B-A-2 -> 3-A-B-2
 
-        one, two, three, four = a_v_id - 1, (a_v_id + 1) % int(self.instance.length/2), b_v_id - 1, (
-                b_v_id + 1) % int(self.instance.length/2)  # -1 is a correct idx in solution ;)
+        one, two, three, four = a_v_id - 1, (a_v_id + 1) % int(self.instance.length / 2), b_v_id - 1, (
+                b_v_id + 1) % int(self.instance.length / 2)  # -1 is a correct idx in solution ;)
         c = self.instance.adjacency_matrix
 
-        if a_v_id == 0 and b_v_id == int(self.instance.length/2) - 1:
+        if a_v_id == 0 and b_v_id == int(self.instance.length / 2) - 1:
             now_length = c[s[three], s[b_v_id]] + c[s[b_v_id], s[a_v_id]] + c[s[a_v_id], s[two]]
             new_length = c[s[three], s[a_v_id]] + c[s[a_v_id], s[b_v_id]] + c[s[b_v_id], s[two]]
         elif b_v_id - a_v_id == 1:
@@ -169,8 +177,8 @@ class LocalSearch(AbstractStrategy):
     def get_value_of_swap_edges(self, s, swap_a_id, swap_b_id):
         c = self.instance.adjacency_matrix
 
-        from_e1_v, to_e1_v = s[swap_a_id], s[(swap_a_id + 1) % int(self.instance.length/2)]
-        from_e2_v, to_e2_v = s[swap_b_id], s[(swap_b_id + 1) % int(self.instance.length/2)]
+        from_e1_v, to_e1_v = s[swap_a_id], s[(swap_a_id + 1) % int(self.instance.length / 2)]
+        from_e2_v, to_e2_v = s[swap_b_id], s[(swap_b_id + 1) % int(self.instance.length / 2)]
 
         diff = c[from_e1_v, from_e2_v] + c[to_e1_v, to_e2_v] - c[from_e1_v, to_e1_v] - c[from_e2_v, to_e2_v]
         return diff
