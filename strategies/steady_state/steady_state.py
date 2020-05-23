@@ -1,29 +1,21 @@
 import time
-from collections import Counter, defaultdict
-from copy import deepcopy
 from itertools import product
-from operator import attrgetter
-from random import sample, seed, shuffle
-
-from tqdm import tqdm
-
-from api.insertion import Insertion
+from random import sample, randint
 from api.instance import Instance
 from strategies.abstract import AbstractStrategy
 from strategies.local_search.local_search import LocalSearch
-from utils.utils import pairwise
 
 import numpy as np
 
 
 class SteadyState(AbstractStrategy):
-    def __init__(self, instance: Instance, neighbourhood='edge'):
+    def __init__(self, instance: Instance, neighbourhood='edge', pop_size=20, perturbation=6):
         assert neighbourhood in ['edge'], "Niedozwolone sąsiedztwo"
         self.instance = instance
         self._solution: list = []
         self.solutions: list = []
-        self.pop_size = 10
-        self.perturbation = 24
+        self.pop_size = pop_size
+        self.perturbation = perturbation
 
     def run(self, run_times=10):
         self.solutions = list()
@@ -58,21 +50,29 @@ class SteadyState(AbstractStrategy):
                 if costs[max_id] > cost:
                     population[max_id] = child
                     costs[max_id] = cost
-                print(time.time() - start, np.min(costs), np.mean(costs))
+                    # print(time.time() - start, np.min(costs), np.mean(costs), np.max(costs))
 
         best_id = np.argmin(costs)
         solution = list(population[best_id])
         solution += [solution[0]]
-        return solution, self._get_solution_cost(solution), time.time() - start
+        cost= self._get_solution_cost(solution)
+        print(cost)
+        return solution, cost, time.time() - start
 
     @staticmethod
     def crossover(parent_1, parent_2):
-        child = list(parent_1[:len(parent_1) // 2])
-        for i in range(len(parent_2)):
-            if len(child) >= len(parent_2):
+        child = list()
+        l = len(parent_1)
+        h = l // 2
+        start1, start2 = randint(0, l - 1), randint(0, l - 1)
+        for i in range(h):
+            child.append(parent_1[(start1 + i) % l])
+        for i in range(l):
+            if len(child) >= l:
                 break
-            if parent_2[i] not in child:
-                child.append(parent_2[i])
+            id = (start2 + i) % l
+            if parent_2[id] not in child:
+                child.append(parent_2[id])
         return child
 
     def perturbate(self, solution):

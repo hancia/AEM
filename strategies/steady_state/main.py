@@ -4,14 +4,8 @@ from itertools import product
 
 import seaborn as sns
 from IPython.core.display import display
-from tqdm import tqdm
 
 from api.instance import Instance
-from strategies.destroy_repair.destroy_repair import DestroyRepairLocalSearch
-from strategies.iterated_local_search.iterated_local_search import IteratedLocalSearch
-from strategies.local_search.local_search import LocalSearch
-from strategies.ls_cache.local_search_with_cache import LocalSearchWitchCache
-from strategies.multiple_local_search.multiple_local_search import MultipleStartLocalSearch
 from strategies.steady_state.steady_state import SteadyState
 from utils.utils import draw_solution
 import pandas as pd
@@ -19,7 +13,7 @@ import numpy as np
 
 sns.set()
 df = pd.DataFrame(columns=['instance', 'cost', 'time'])
-for instance_name in ['kroA200', 'kroB200']:
+for instance_name in ['kroA200']:
     instance = Instance(name=instance_name)
     solve_strategy: SteadyState = SteadyState(
         instance=instance
