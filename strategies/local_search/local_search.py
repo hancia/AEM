@@ -36,8 +36,8 @@ class LocalSearch(AbstractStrategy):
 
     def _solve_steepest(self, s, sol=None, cycle=True):
         start = time.time()
-        np.random.seed(s)
-        seed(s)
+        # np.random.seed(s)
+        # seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
         if sol is None:
             solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
@@ -89,9 +89,10 @@ class LocalSearch(AbstractStrategy):
             if improvement_in or improvement_out:
                 solution = candidate
 
+        full_sol = solution + [solution[0]]
         if cycle:
-            solution += [solution[0]]
-        return solution, self._get_solution_cost(solution), time.time() - start
+            solution=full_sol
+        return solution, self._get_solution_cost(full_sol), time.time() - start
 
     def _solve_greedy(self, s):
         start = time.time()

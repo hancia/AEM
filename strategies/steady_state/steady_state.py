@@ -34,7 +34,7 @@ class SteadyState(AbstractStrategy):
 
     def _solve_steady_state(self, seed):
         ls: LocalSearch = LocalSearch(instance=self.instance, version='steepest', neighbourhood='edge')
-        np.random.seed(seed)
+        # np.random.seed(seed)
         start = time.time()
         population = np.array([np.random.permutation(self.instance.length) \
                                for _ in range(self.pop_size)])[:, :self.instance.length // 2]
@@ -65,7 +65,8 @@ class SteadyState(AbstractStrategy):
         solution += [solution[0]]
         return solution, self._get_solution_cost(solution), time.time() - start
 
-    def crossover(self, parent_1, parent_2):
+    @staticmethod
+    def crossover(parent_1, parent_2):
         child = list(parent_1[:len(parent_1) // 2])
         for i in range(len(parent_2)):
             if len(child) >= len(parent_2):
