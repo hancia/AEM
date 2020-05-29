@@ -96,8 +96,8 @@ class LocalSearch(AbstractStrategy):
 
     def _solve_greedy(self, s):
         start = time.time()
-        np.random.seed(s)
-        seed(s)
+        # np.random.seed(s)
+        # seed(s)
         # REMEMBER SOLUTION HERE DOESNT CONTAIN CYCLE!!!!!!! Append before return!
         solution: list = sample(list(range(self.instance.length)), int(self.instance.length / 2))
         improvement_out: bool = True
