@@ -3,6 +3,8 @@ from copy import deepcopy
 from itertools import product
 from random import sample, seed
 
+from tqdm import tqdm
+
 from api.instance import Instance
 from strategies.abstract import AbstractStrategy
 from utils.utils import pairwise
@@ -22,7 +24,7 @@ class LocalSearch(AbstractStrategy):
 
     def run(self, run_times=100):
         self.solutions = list()
-        for i in range(run_times):
+        for i in tqdm(range(run_times)):
             if self.version == 'greedy':
                 self.solutions.append(self._solve_greedy(i))
             else:
